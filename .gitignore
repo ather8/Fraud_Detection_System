@@ -4,10 +4,6 @@ venv/
 *.pyc
 .env
 
-# ML Models (Too large for Git)
-backend/ml_models/*.onnx
-backend/ml_models/*.pkl
-
 # Frontend
 frontend/node_modules/
 frontend/dist/
