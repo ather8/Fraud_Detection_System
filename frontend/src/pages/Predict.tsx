@@ -63,7 +63,7 @@ const Predict = () => {
       <header className="mb-8">
         <h1 className="text-3xl font-bold tracking-tight">Prediction Demo</h1>
         <p className="mt-1 text-muted-foreground">
-          Enter the 11 PCA features and submit to score the transaction.
+          Enter the 11 features and submit to score the transaction.
         </p>
       </header>
 
