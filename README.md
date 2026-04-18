@@ -1,50 +1,222 @@
-Here is the comprehensive README.md tailored for your professional Isolation Forest deployment using Docker Compose.
+# 🛡️ Fraud Detection System
 
-# 🛡️ FraudWatch AI: Isolation Forest Edition
-A full-stack, end-to-end Machine Learning application for real-time credit card fraud detection. This project uses an **Isolation Forest** model exported to **ONNX** for high-performance inference, a **FastAPI** backend, and a **React** dashboard.
-## 📊 Model Performance- **Algorithm:** Isolation Forest (`contamination=0.05`)- **Recall:** 0.90 (Successfully flags 90% of all fraud cases)- **ROC AUC:** 0.93
-- **Selected Features (11):** `V2, V4, V7, V11, V12, V14, V16, V17, V18, V19, Hour`
-## 🏗️ Project Architecture- **Machine Learning:** Scikit-Learn → ONNX Runtime (Inference)- **Backend:** FastAPI (Python), SQLModel (ORM), JWT Authentication- **Database:** PostgreSQL (Stores Incident Logs and User Data)- **Frontend:** Vite + React, Tailwind CSS, Recharts (Real-time visualization)- **Deployment:** Docker & Docker Compose
-## 📂 Required Model FilesBefore launching, ensure the following files are in the `backend/ml_models/` directory:
-1. `iso_forest.onnx` — The exported Isolation Forest model.
-2. `iso_scaler.pkl` — The StandardScaler fitted on the 11 specific features.
----## 🚀 Getting Started (Docker Deployment)### 1. Prerequisites- [Docker Desktop](https://docker.com) installed and running.- Git installed.
-### 2. Launch the EnvironmentOpen your terminal in the project root directory and run:
+A full-stack **credit card fraud / anomaly detection** platform that pairs an
+unsupervised **Isolation Forest** model with a modern web dashboard.
+Transactions are scored in real time by a FastAPI service, persisted to
+PostgreSQL, and visualised through a React + Vite frontend — all orchestrated
+with Docker Compose.
 
-```powershell
-# Build and start all services (Database, Backend, Frontend)
-docker compose up --build -d
+---
 
-## 3. Access the Application
+## ✨ Features
 
-* Dashboard (UI): http://localhost
-* API Documentation: http://localhost:8000/docs
-* Database: Internal PostgreSQL accessible on port 5432
+- 🤖 **ML-powered anomaly detection** using scikit-learn's Isolation Forest
+- ⚡ **FastAPI** backend exposing a clean REST API for scoring transactions
+- 🐘 **PostgreSQL** "Incident Log" that persists every flagged transaction
+- 🎨 **React + Vite + Tailwind CSS + shadcn/ui** dashboard for analysts
+- 📓 **Jupyter notebook** documenting the data exploration & model training
+- 🐳 **Dockerised** — one command spins up DB, API, and UI together
 
-------------------------------
-## 🛠️ Development & Testing## Initial Setup (Local User)
+---
 
-   1. Navigate to http://localhost:8000/docs.
-   2. Use the POST /auth/register endpoint to create an account.
-   3. Use the POST /auth/token endpoint to verify your JWT generation.
+## 🏗️ Architecture
 
+```
+┌────────────────┐      HTTP      ┌────────────────┐     SQL    ┌──────────────┐
+│  React (Vite)  │  ───────────▶  │ FastAPI + ML   │ ─────────▶ │  PostgreSQL  │
+│   Dashboard    │  ◀───────────  │ Isolation Frst │ ◀───────── │  fraud_db    │
+└────────────────┘    JSON        └────────────────┘            └──────────────┘
+       :80                              :8000                         :5432
+```
 
-## 📁 Repository Structure
+---
 
-├── backend/
-│   ├── app/                # FastAPI logic (API, Models, Services, Core)
-│   ├── ml_models/          # .onnx and .pkl files
-│   └── Dockerfile          # Python-slim environment
-├── frontend/
-│   ├── src/                # React components and Dashboard logic
-│   ├── public/
-│   └── Dockerfile          # Multi-stage Nginx build
-├── notebooks/              # Jupyter research and model export logic
-└── docker-compose.yml      # Service orchestration
+## 📁 Project Structure
 
-------------------------------
-## 🛡️ Security
+```
+Fraud_Detection_System/
+├── backend/                # FastAPI service + ML model
+│   ├── app/                # API routes, schemas, ML logic
+│   ├── Dockerfile
+│   ├── requirements.txt
+│   └── fraud_db.db         # SQLite fallback (Postgres used in Docker)
+├── frontend/               # React + Vite + Tailwind UI
+│   ├── src/
+│   ├── Dockerfile
+│   └── package.json
+├── notebooks/
+│   └── Anomaly_Detection_in_Credit_Card_Transactions.ipynb
+├── docker-compose.yml      # Orchestrates db + backend + frontend
+├── run_project.sh          # Convenience launcher
+└── README.md
+```
 
-* JWT Auth: All sensitive endpoints (History/Prediction) are protected via Bearer tokens.
-* Bcrypt: Passwords are salted and hashed before storage in PostgreSQL.
-* Persistence: Database records are persisted across container restarts via Docker Volumes.
+---
+
+## 🚀 Quick Start (Docker — recommended)
+
+> Requires **Docker** and **Docker Compose**.
+
+```bash
+# 1. Clone the repository
+git clone https://github.com/ather8/Fraud_Detection_System.git
+cd Fraud_Detection_System
+
+# 2. Build & start everything
+docker compose up --build
+```
+
+Once the containers are healthy:
+
+| Service   | URL                                              |
+|-----------|--------------------------------------------------|
+| Frontend  | http://localhost                                 |
+| Backend   | http://localhost:8000                            |
+| API Docs  | http://localhost:8000/docs (Swagger UI)          |
+| Database  | `postgresql://postgres:postgres@localhost:5432/fraud_db` |
+
+To stop:
+
+```bash
+docker compose down
+```
+
+To reset the database volume:
+
+```bash
+docker compose down -v
+```
+
+You can also use the helper script:
+
+```bash
+chmod +x run_project.sh
+./run_project.sh
+```
+
+---
+
+## 🧑‍💻 Local Development (without Docker)
+
+### Backend (FastAPI)
+
+```bash
+cd backend
+python -m venv venv
+source venv/bin/activate          # Windows: venv\Scripts\activate
+pip install -r requirements.txt
+uvicorn app.main:app --reload --port 8000
+```
+
+### Frontend (React + Vite)
+
+```bash
+cd frontend
+npm install            # or: bun install
+npm run dev
+```
+
+The dev server will start on http://localhost:5173 by default.
+
+---
+
+## 📓 Notebook
+
+The `notebooks/` folder contains the full data-science workflow used to design
+the detector:
+
+- Exploratory data analysis on credit card transactions
+- Feature engineering & scaling
+- Training and evaluating the **Isolation Forest** model
+- Exporting the trained model for the FastAPI service
+
+Open it with:
+
+```bash
+jupyter notebook notebooks/Anomaly_Detection_in_Credit_Card_Transactions.ipynb
+```
+
+---
+
+## 🛠️ Tech Stack
+
+**Backend / ML**
+- Python 3.11
+- FastAPI, Uvicorn
+- scikit-learn (Isolation Forest)
+- pandas, NumPy
+- SQLAlchemy + PostgreSQL
+
+**Frontend**
+- React 18 + TypeScript
+- Vite
+- Tailwind CSS + shadcn/ui
+- TanStack Query, React Router
+
+**Infrastructure**
+- Docker & Docker Compose
+- PostgreSQL 15 (Alpine)
+- Nginx (serving the production frontend build)
+
+---
+
+## 🔌 API Overview
+
+Once the backend is running, full interactive docs are available at
+**http://localhost:8000/docs**.
+
+Typical endpoints include:
+
+| Method | Endpoint              | Description                          |
+|--------|-----------------------|--------------------------------------|
+| POST   | `/predict`            | Score a single transaction           |
+| GET    | `/incidents`          | List all flagged transactions        |
+| GET    | `/incidents/{id}`     | Retrieve a specific incident         |
+| GET    | `/health`             | Liveness check                       |
+
+Example request:
+
+```bash
+curl -X POST http://localhost:8000/predict \
+  -H "Content-Type: application/json" \
+  -d '{"amount": 1234.56, "features": [/* V1..V28 */]}'
+```
+
+---
+
+## 🗄️ Environment Variables
+
+The backend reads its database connection from `DATABASE_URL`.
+Defaults are set in `docker-compose.yml`:
+
+```env
+DATABASE_URL=postgresql://postgres:postgres@db:5432/fraud_db
+```
+
+For local development you can copy and adjust as needed.
+
+---
+
+## 🤝 Contributing
+
+Contributions, issues and feature requests are welcome!
+
+1. Fork the project
+2. Create your feature branch (`git checkout -b feature/amazing-thing`)
+3. Commit your changes (`git commit -m 'Add amazing thing'`)
+4. Push to the branch (`git push origin feature/amazing-thing`)
+5. Open a Pull Request
+
+---
+
+## 📄 License
+
+This project is released under the MIT License — see `LICENSE` for details.
+
+---
+
+## 👤 Author
+
+**Ather Sayed** — [@ather8](https://github.com/ather8)
+
+If this project helped you, please consider giving it a ⭐ on GitHub!
