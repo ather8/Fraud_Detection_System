@@ -3,45 +3,35 @@ import numpy as np
 import joblib
 import os
 
-class ModelLoader:
+class MLService:
     _instance = None
 
     def __new__(cls):
         if cls._instance is None:
-            cls._instance = super(ModelLoader, cls).__new__(cls)
-            # Define paths relative to this file
+            cls._instance = super(MLService, cls).__new__(cls)
             base_path = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+            
+            # Paths to your exported files
             model_path = os.path.join(base_path, "ml_models", "iso_forest.onnx")
             scaler_path = os.path.join(base_path, "ml_models", "iso_scaler.pkl")
 
             try:
-                # Load the ONNX inference session
                 cls._instance.session = ort.InferenceSession(model_path)
                 cls._instance.input_name = cls._instance.session.get_inputs()[0].name
-                
-                # Load the StandardScaler
                 cls._instance.scaler = joblib.load(scaler_path)
-                print("✅ Model and Scaler loaded successfully.")
+                print("✅ Isolation Forest Engine Ready.")
             except Exception as e:
-                print(f"❌ Error loading model/scaler: {e}")
+                print(f"❌ ML Init Failed: {e}")
                 raise e
-        
         return cls._instance
 
-    def predict(self, raw_features: list):
-        """
-        Preprocesses raw input and runs ONNX inference.
-        """
-        # 1. Convert to numpy and reshape for a single sample
-        input_array = np.array(raw_features).reshape(1, -1).astype(np.float32)
+    def run_inference(self, raw_features: list):
+        # Must be exactly 11 features: [V2, V4, V7, V11, V12, V14, V16, V17, V18, V19, Hour]
+        input_data = np.array(raw_features).reshape(1, -1).astype(np.float32)
+        scaled_data = self.scaler.transform(input_data)
         
-        # 2. Scale the data using the loaded Scaler
-        scaled_data = self.scaler.transform(input_array)
-        
-        # 3. Run Inference
+        # Isolation Forest ONNX returns [label, scores]
         outputs = self.session.run(None, {self.input_name: scaled_data})
-        return scaled_data, outputs   # return the whole list
+        return scaled_data, outputs
 
-
-# Create a single global instance to be used across the app
-model_service = ModelLoader()
+ml_engine = MLService()

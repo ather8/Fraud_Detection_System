@@ -45,7 +45,7 @@ const Model = () => {
           </div>
           <ol className="space-y-3 text-sm">
             {[
-              { t: "Input", d: "11 PCA features + Hour" },
+              { t: "Input", d: "11 features + Hour" },
               { t: "Scale", d: "StandardScaler (joblib)" },
               { t: "Isolation Forest scoring", d: "ONNX Runtime inference" },
               { t: "Threshold", d: "0.05 anomaly score" },
@@ -69,7 +69,7 @@ const Model = () => {
             <h2 className="font-semibold">Input features</h2>
           </div>
           <p className="mb-4 text-sm text-muted-foreground">
-            11 features from the Kaggle credit-card fraud dataset (PCA-reduced for privacy + the transaction Hour).
+            11 features from the Kaggle credit-card fraud dataset + the transaction Hour.
           </p>
           <div className="flex flex-wrap gap-2">
             {FEATURE_NAMES.map((f) => (

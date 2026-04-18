@@ -23,17 +23,10 @@ class ModelLoader:
                 raise e
         return cls._instance
 
-    def predict(self, raw_features: list):
-        input_array = np.array(raw_features).reshape(1, -1).astype(np.float32)
-        scaled_data = self.scaler.transform(input_array)
-        
-        # ONNX Isolation Forest returns: [label, scores]
-        # Label: 1 (normal), -1 (anomaly)
-        # Score: Negative values indicate anomalies
+    def predict(self, raw_features: list):  # Rename this to 'predict'
+        input_data = np.array(raw_features).reshape(1, -1).astype(np.float32)
+        scaled_data = self.scaler.transform(input_data)
         outputs = self.session.run(None, {self.input_name: scaled_data})
-        label = outputs[0]
-        scores = outputs[1] 
-        
-        return scaled_data, label, scores
+        return scaled_data, outputs
 
 model_service = ModelLoader()

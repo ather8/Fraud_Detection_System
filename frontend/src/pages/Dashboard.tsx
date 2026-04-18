@@ -21,19 +21,19 @@ import { cn } from "@/lib/utils";
 
 // Placeholder metrics — replace with real values from your notebook
 const METRICS = {
-  accuracy: 0.9987,
-  precision: 0.873,
-  recall: 0.812,
-  f1: 0.841,
-  auc: 0.962,
-  threshold: 0.05,
+  accuracy: 0.95,
+  precision: 0.05,
+  recall: 0.90,
+  f1: 0.06,
+  auc: 0.93,
+  threshold: 0,
 };
 
 const CONFUSION = {
-  tn: 56843,
-  fp: 19,
-  fn: 18,
-  tp: 78,
+  tn: 270517,
+  fp: 13798,
+  fn: 49,
+  tp: 443,
 };
 
 const ERROR_DIST = [

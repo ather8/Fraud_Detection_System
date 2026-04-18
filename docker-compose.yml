@@ -1,5 +1,5 @@
 services:
-  # Database Service
+  # 1. Database: Standard PostgreSQL container
   db:
     image: postgres:15-alpine
     container_name: fraud_db
@@ -10,26 +10,32 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data # Persists your 'Incident Log'
 
-  # Backend API Service
+  # 2. Backend: FastAPI + Isolation Forest
   backend:
-    build: ./backend
+    build:
+      context: ./backend # Looks inside your 'backend' folder
+      dockerfile: Dockerfile
     container_name: fraud_backend
     ports:
       - "8000:8000"
     environment:
       - DATABASE_URL=postgresql://postgres:postgres@db:5432/fraud_db
-      - SECRET_KEY=your_secret_key_here
     depends_on:
       - db
+    volumes:
+      # Mounts the backend folder so code changes sync immediately (Development only)
+      - ./backend:/app
 
-  # Frontend Web Service
+  # 3. Frontend: React/Vite served via Nginx
   frontend:
-    build: ./frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
     container_name: fraud_frontend
     ports:
-      - "80:80"
+      - "80:80" # Access the UI at http://localhost
     depends_on:
       - backend
 

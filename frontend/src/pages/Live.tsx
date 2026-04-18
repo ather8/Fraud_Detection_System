@@ -104,7 +104,7 @@ const Live = () => {
       <Card className="mt-6 border-border bg-card p-6 scan-line">
         <div className="mb-4 flex items-center gap-2">
           <Activity className="h-4 w-4 text-primary" />
-          <h2 className="font-semibold">Reconstruction error stream</h2>
+          <h2 className="font-semibold">Anomaly score stream</h2>
           <Badge variant="outline" className="ml-auto text-xs">
             Threshold: {threshold.toFixed(4)}
           </Badge>
