@@ -19,6 +19,36 @@ with Docker Compose.
 
 ---
 
+## 📸 Screenshots
+
+A visual tour of the dashboard and core flows.
+
+### 🔐 Login
+![Login](./Screenshots/Login.png)
+
+### 🏠 Home
+![Home](./Screenshots/Home.png)
+
+### 📡 Live Feed
+![Live Feed](./Screenshots/Live%20Feed.png)
+
+### 🔮 Prediction
+![Prediction](./Screenshots/Prediction.png)
+
+### ✅ Normal Transaction
+![Normal Transaction](./Screenshots/Normal%20Transaction.png)
+
+### 🚨 Fraudulent Transaction
+![Fraudulent Transaction](./Screenshots/Fraudlant%20Transaction.png)
+
+### 📊 Performance
+![Performance](./Screenshots/Performance.png)
+
+### 🧠 Model Info
+![Model Info](./Screenshots/Model%20Info.png)
+
+---
+
 ## 🏗️ Architecture
 
 ```
@@ -46,6 +76,7 @@ Fraud_Detection_System/
 │   └── package.json
 ├── notebooks/
 │   └── Anomaly_Detection_in_Credit_Card_Transactions.ipynb
+├── Screenshots/            # UI screenshots used in this README
 ├── docker-compose.yml      # Orchestrates db + backend + frontend
 ├── run_project.sh          # Convenience launcher
 └── README.md
