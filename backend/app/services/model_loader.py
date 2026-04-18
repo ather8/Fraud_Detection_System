@@ -9,41 +9,31 @@ class ModelLoader:
     def __new__(cls):
         if cls._instance is None:
             cls._instance = super(ModelLoader, cls).__new__(cls)
-            # Define paths relative to this file
             base_path = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
-            model_path = os.path.join(base_path, "ml_models", "iso_forest.onnx")
+            model_path = os.path.join(base_path, "ml_models", "iso_forest.onnx") # Updated filename
             scaler_path = os.path.join(base_path, "ml_models", "iso_scaler.pkl")
 
             try:
-                # Load the ONNX inference session
                 cls._instance.session = ort.InferenceSession(model_path)
                 cls._instance.input_name = cls._instance.session.get_inputs()[0].name
-                
-                # Load the StandardScaler
                 cls._instance.scaler = joblib.load(scaler_path)
-                print("✅ Model and Scaler loaded successfully.")
+                print("✅ Isolation Forest and Scaler loaded.")
             except Exception as e:
-                print(f"❌ Error loading model/scaler: {e}")
+                print(f"❌ Error: {e}")
                 raise e
-        
         return cls._instance
 
     def predict(self, raw_features: list):
-        """
-        Preprocesses raw input and runs ONNX inference.
-        """
-        # 1. Convert to numpy and reshape for a single sample
         input_array = np.array(raw_features).reshape(1, -1).astype(np.float32)
-        
-        # 2. Scale the data using the loaded Scaler
         scaled_data = self.scaler.transform(input_array)
         
-        # 3. Run Inference
-        # For Autoencoders, this returns the reconstructed output
+        # ONNX Isolation Forest returns: [label, scores]
+        # Label: 1 (normal), -1 (anomaly)
+        # Score: Negative values indicate anomalies
         outputs = self.session.run(None, {self.input_name: scaled_data})
-        reconstructed_data = outputs[0]
+        label = outputs[0]
+        scores = outputs[1] 
         
-        return scaled_data, reconstructed_data
+        return scaled_data, label, scores
 
-# Create a single global instance to be used across the app
 model_service = ModelLoader()

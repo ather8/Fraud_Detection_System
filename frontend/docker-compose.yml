@@ -1,0 +1,37 @@
+services:
+  # Database Service
+  db:
+    image: postgres:15-alpine
+    container_name: fraud_db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: fraud_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  # Backend API Service
+  backend:
+    build: ./backend
+    container_name: fraud_backend
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/fraud_db
+      - SECRET_KEY=your_secret_key_here
+    depends_on:
+      - db
+
+  # Frontend Web Service
+  frontend:
+    build: ./frontend
+    container_name: fraud_frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:

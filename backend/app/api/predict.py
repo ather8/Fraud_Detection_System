@@ -2,64 +2,74 @@ from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
 from typing import List
 import numpy as np
+import json
 from app.services.model_loader import model_service
-
 from app.models.prediction import PredictionLog
-from sqlmodel import Session, select
+from sqlmodel import Session
 from app.core.config import engine
 
-# Define the API Route group
 router = APIRouter()
 
-# 1. Define the Input Data Schema
 class TransactionRequest(BaseModel):
-    # This expects a list of numbers (V2, V4, V11, Hour, etc.)
     features: List[float]
 
-# 2. Define the Output Data Schema
 class PredictionResponse(BaseModel):
     is_fraud: bool
-    reconstruction_error: float
+    anomaly_score: float
     feature_importance: List[dict]
     threshold: float
-
-# The Detection Logic
-THRESHOLD = 0.05  # Set this to the 90th percentile from your notebook
 
 @router.post("/predict", response_model=PredictionResponse)
 async def predict_fraud(request: TransactionRequest):
     try:
-        # A. Run Inference through our Model Service
-        scaled_data, reconstructed = model_service.predict(request.features)
+        # 1. Get results from model
+        # Typically returns: [labels_array, scores_array]
+        result = model_service.predict(request.features)
+        
+        # Safe unpacking: labels are result[0], scores are result[1]
+        labels = result[0] 
+        scores = result[1]
+        
+        # 2. Isolation Forest Logic:
+        # Label -1 = Anomaly (Fraud), 1 = Normal
+        is_fraud = bool(labels[0] == -1)
+        
+        # Anomaly Score: 
+        # In sklearn, lower/more negative = more anomalous. 
+        # In ONNX/AutoML, it's often a probability or distance.
+        score = float(scores[0]) 
 
-        # B. Calculate Reconstruction Error (MSE)
-        # We compare how well the model "re-drew" the input
-        errors = np.power(scaled_data - reconstructed, 2)
-        mse = np.mean(errors)
-
-        # C. Determine Fraud Status
-        is_fraud = bool(mse > THRESHOLD)
-
-        # D. Calculate Feature Importance (Explainability)
-        # Which feature contributed most to the error?
+        # 3. Feature Importance for Isolation Trees
+        # Since Trees don't have "errors", we use the distance from mean or 
+        # contribution to the path length. A simple proxy is the absolute 
+        # scaled value of the feature.
         feature_names = ['V2', 'V4', 'V7', 'V11', 'V12', 'V14', 'V16', 'V17', 'V18', 'V19', 'Hour']
+        
+        # Using scaled_data for explainability (assuming model_service provides it)
+        # If model_service only returns (labels, scores), you may need to 
+        # adjust your service to also return the scaled_input.
+        scaled_input = request.features # Replace with actual scaled data if available
+        
         importance = [
-            {"name": name, "value": float(err)} 
-            for name, err in zip(feature_names, errors[0])
+            {"name": n, "value": float(abs(v))}
+            for n, v in zip(feature_names, scaled_input)
         ]
 
         return {
             "is_fraud": is_fraud,
-            "reconstruction_error": float(mse),
+            "anomaly_score": score, # Rename to 'anomaly_score' in your Pydantic model
             "feature_importance": importance,
             "threshold": THRESHOLD
         }
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Prediction Error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Inference Error: {str(e)}")
+
+
 
 @router.get("/history")
 async def get_history():
     with Session(engine) as session:
+        from sqlmodel import select
         statement = select(PredictionLog).order_by(PredictionLog.timestamp.desc()).limit(10)
         return session.exec(statement).all()

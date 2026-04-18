@@ -2,7 +2,164 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-  margin: 0;
-  overflow-x: hidden;
+/* FraudWatch AI — Dark Security Ops design system. All colors HSL. */
+
+@layer base {
+  :root {
+    /* Dark-first: light vars exist but app forces dark */
+    --background: 222 47% 5%;
+    --foreground: 210 40% 96%;
+
+    --card: 222 40% 8%;
+    --card-foreground: 210 40% 96%;
+
+    --popover: 222 40% 8%;
+    --popover-foreground: 210 40% 96%;
+
+    /* Emerald = safe / primary signal */
+    --primary: 152 76% 44%;
+    --primary-foreground: 222 47% 6%;
+    --primary-glow: 152 84% 58%;
+
+    --secondary: 217 33% 14%;
+    --secondary-foreground: 210 40% 96%;
+
+    --muted: 217 33% 12%;
+    --muted-foreground: 215 20% 60%;
+
+    --accent: 217 33% 16%;
+    --accent-foreground: 210 40% 96%;
+
+    /* Red = fraud / destructive */
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 40% 98%;
+    --destructive-glow: 0 91% 71%;
+
+    --success: 152 76% 44%;
+    --success-foreground: 222 47% 6%;
+
+    --warning: 38 92% 55%;
+    --warning-foreground: 222 47% 6%;
+
+    --border: 217 33% 16%;
+    --input: 217 33% 16%;
+    --ring: 152 76% 44%;
+
+    --radius: 0.75rem;
+
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--primary-glow)) 100%);
+    --gradient-danger: linear-gradient(135deg, hsl(var(--destructive)) 0%, hsl(var(--destructive-glow)) 100%);
+    --gradient-radial: radial-gradient(ellipse at top, hsl(152 76% 44% / 0.15), transparent 60%);
+    --gradient-mesh: radial-gradient(at 20% 20%, hsl(152 76% 44% / 0.12) 0px, transparent 50%),
+                     radial-gradient(at 80% 0%, hsl(0 84% 60% / 0.08) 0px, transparent 50%),
+                     radial-gradient(at 0% 100%, hsl(217 91% 60% / 0.06) 0px, transparent 50%);
+
+    /* Shadows */
+    --shadow-glow-primary: 0 0 40px hsl(var(--primary) / 0.35);
+    --shadow-glow-danger: 0 0 40px hsl(var(--destructive) / 0.35);
+    --shadow-card: 0 8px 32px -8px hsl(222 47% 2% / 0.6);
+
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+    /* Sidebar */
+    --sidebar-background: 222 47% 4%;
+    --sidebar-foreground: 215 20% 70%;
+    --sidebar-primary: 152 76% 44%;
+    --sidebar-primary-foreground: 222 47% 6%;
+    --sidebar-accent: 217 33% 12%;
+    --sidebar-accent-foreground: 210 40% 96%;
+    --sidebar-border: 217 33% 14%;
+    --sidebar-ring: 152 76% 44%;
+  }
+
+  .dark {
+    /* Same as :root — app is dark by default */
+    --background: 222 47% 5%;
+    --foreground: 210 40% 96%;
+    --card: 222 40% 8%;
+    --card-foreground: 210 40% 96%;
+    --popover: 222 40% 8%;
+    --popover-foreground: 210 40% 96%;
+    --primary: 152 76% 44%;
+    --primary-foreground: 222 47% 6%;
+    --secondary: 217 33% 14%;
+    --secondary-foreground: 210 40% 96%;
+    --muted: 217 33% 12%;
+    --muted-foreground: 215 20% 60%;
+    --accent: 217 33% 16%;
+    --accent-foreground: 210 40% 96%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217 33% 16%;
+    --input: 217 33% 16%;
+    --ring: 152 76% 44%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    @apply dark;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    background-image: var(--gradient-mesh);
+    background-attachment: fixed;
+  }
+}
+
+@layer utilities {
+  .gradient-primary { background-image: var(--gradient-primary); }
+  .gradient-danger { background-image: var(--gradient-danger); }
+  .text-gradient-primary {
+    background-image: var(--gradient-primary);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .glow-primary { box-shadow: var(--shadow-glow-primary); }
+  .glow-danger { box-shadow: var(--shadow-glow-danger); }
+  .shadow-card { box-shadow: var(--shadow-card); }
+  .transition-smooth { transition: var(--transition-smooth); }
+
+  .grid-bg {
+    background-image:
+      linear-gradient(hsl(var(--border) / 0.4) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(var(--border) / 0.4) 1px, transparent 1px);
+    background-size: 32px 32px;
+  }
+
+  .scan-line {
+    position: relative;
+    overflow: hidden;
+  }
+  .scan-line::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, transparent, hsl(var(--primary) / 0.08), transparent);
+    animation: scan 4s linear infinite;
+  }
+  @keyframes scan {
+    0% { transform: translateY(-100%); }
+    100% { transform: translateY(100%); }
+  }
+
+  @keyframes pulse-glow {
+    0%, 100% { box-shadow: 0 0 0 0 hsl(var(--primary) / 0.4); }
+    50% { box-shadow: 0 0 0 12px hsl(var(--primary) / 0); }
+  }
+  .pulse-glow { animation: pulse-glow 2s infinite; }
+
+  @keyframes pulse-danger {
+    0%, 100% { box-shadow: 0 0 0 0 hsl(var(--destructive) / 0.5); }
+    50% { box-shadow: 0 0 0 14px hsl(var(--destructive) / 0); }
+  }
+  .pulse-danger { animation: pulse-danger 1.5s infinite; }
 }

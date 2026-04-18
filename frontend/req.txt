@@ -1,0 +1,13 @@
+fastapi
+uvicorn
+onnxruntime
+numpy
+pydantic
+joblib
+sqlmodel
+psycopg2-binary
+python-jose[cryptography]
+passlib[bcrypt]
+python-multipart
+scikit-learn
+bcrypt==4.0.1
